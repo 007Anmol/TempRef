@@ -1,0 +1,574 @@
+/**
+ * Component Examples and Patterns
+ * Copy and paste examples for common UI patterns
+ */
+
+// ============================================================================
+// EXAMPLE 1: Simple Welcome Screen with Hero and Features
+// ============================================================================
+
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { Button, Card, Spacer } from '../src/components';
+import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../src/theme';
+
+function WelcomeScreenExample() {
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {/* Hero Section */}
+      <View style={styles.hero}>
+        <View style={styles.iconBadge}>
+          <Ionicons name="heart-outline" size={32} color={theme.colors.primary} />
+        </View>
+        <Spacer size={theme.spacing.md} />
+        <Text style={styles.title}>Welcome to Health App</Text>
+        <Spacer size={theme.spacing.sm} />
+        <Text style={styles.subtitle}>
+          Get personalized health insights and track your wellness journey
+        </Text>
+      </View>
+
+      <Spacer size={theme.spacing['2xl']} />
+
+      {/* Feature Cards */}
+      <Card elevated>
+        <View style={styles.featureItem}>
+          <View style={styles.smallBadge}>
+            <Ionicons name="flash-outline" size={24} color={theme.colors.primary} />
+          </View>
+          <View style={styles.featureText}>
+            <Text style={styles.featureTitle}>Fast Tracking</Text>
+            <Text style={styles.featureDesc}>Log your health data in seconds</Text>
+          </View>
+        </View>
+      </Card>
+
+      <Spacer size={theme.spacing.md} />
+
+      <Card elevated>
+        <View style={styles.featureItem}>
+          <View style={styles.smallBadge}>
+            <Ionicons name="bar-chart-outline" size={24} color={theme.colors.secondary} />
+          </View>
+          <View style={styles.featureText}>
+            <Text style={styles.featureTitle}>Smart Insights</Text>
+            <Text style={styles.featureDesc}>AI-powered health recommendations</Text>
+          </View>
+        </View>
+      </Card>
+
+      <Spacer size={theme.spacing['2xl']} />
+
+      {/* CTAs */}
+      <Button
+        title="Get Started"
+        onPress={() => {}}
+        size="large"
+        fullWidth
+      />
+      <Spacer size={theme.spacing.md} />
+      <Button
+        title="Learn More"
+        onPress={() => {}}
+        variant="outline"
+        size="large"
+        fullWidth
+      />
+
+      <Spacer size={theme.spacing['3xl']} />
+    </ScrollView>
+  );
+}
+
+// ============================================================================
+// EXAMPLE 2: Form Screen with Validation
+// ============================================================================
+
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { Button, Card, Spacer, FormInput, InfoBox, LoadingOverlay } from '../src/components';
+import { theme } from '../src/theme';
+
+function FormScreenExample() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!name.trim()) newErrors.name = 'Name is required';
+    if (!email.includes('@')) newErrors.email = 'Valid email is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validate()) return;
+    setLoading(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setLoading(false);
+  };
+
+  return (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <View style={styles.hero}>
+          <Text style={styles.title}>Create Profile</Text>
+          <Spacer size={theme.spacing.sm} />
+          <Text style={styles.subtitle}>Tell us about yourself</Text>
+        </View>
+
+        <Spacer size={theme.spacing.lg} />
+
+        <Card elevated>
+          <FormInput
+            label="Full Name"
+            placeholder="John Doe"
+            value={name}
+            onChangeText={setName}
+            icon="person-outline"
+            error={errors.name}
+          />
+          <Spacer size={theme.spacing.lg} />
+          <FormInput
+            label="Email"
+            placeholder="john@example.com"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            icon="mail-outline"
+            error={errors.email}
+          />
+        </Card>
+
+        <Spacer size={theme.spacing.lg} />
+
+        <InfoBox
+          message="We'll use your email to send you health updates and insights"
+          type="info"
+        />
+
+        <Spacer size={theme.spacing['2xl']} />
+
+        <Button
+          title="Create Account"
+          onPress={handleSubmit}
+          size="large"
+          fullWidth
+          disabled={loading}
+        />
+
+        <Spacer size={theme.spacing['3xl']} />
+
+        <LoadingOverlay visible={loading} message="Creating your account..." />
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+// ============================================================================
+// EXAMPLE 3: List Screen with Empty State
+// ============================================================================
+
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, FlatList, Image, Pressable } from 'react-native';
+import { Button, Card, Spacer } from '../src/components';
+import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../src/theme';
+
+interface HealthRecord {
+  id: string;
+  title: string;
+  date: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}
+
+function ListScreenExample({ records = [] }: { records?: HealthRecord[] }) {
+  const renderEmpty = () => (
+    <View style={styles.emptyContainer}>
+      <View style={styles.emptyIcon}>
+        <Ionicons name="folder-open-outline" size={48} color={theme.colors.text.tertiary} />
+      </View>
+      <Spacer size={theme.spacing.md} />
+      <Text style={styles.emptyTitle}>No Records Yet</Text>
+      <Spacer size={theme.spacing.sm} />
+      <Text style={styles.emptyDesc}>
+        Start by creating your first health record
+      </Text>
+      <Spacer size={theme.spacing.lg} />
+      <Button title="Add Record" onPress={() => {}} size="small" />
+    </View>
+  );
+
+  const renderItem = ({ item }: { item: HealthRecord }) => (
+    <Card elevated style={styles.recordCard}>
+      <View style={styles.recordHeader}>
+        <View style={styles.recordIcon}>
+          <Ionicons name={item.icon} size={24} color={theme.colors.primary} />
+        </View>
+        <View style={styles.recordInfo}>
+          <Text style={styles.recordTitle}>{item.title}</Text>
+          <Text style={styles.recordDate}>{item.date}</Text>
+        </View>
+        <Pressable>
+          <Ionicons name="chevron-forward-outline" size={24} color={theme.colors.text.tertiary} />
+        </Pressable>
+      </View>
+    </Card>
+  );
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Health Records</Text>
+        <Spacer size={theme.spacing.md} />
+      </View>
+      <FlatList
+        data={records}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={renderEmpty}
+        scrollEnabled={false}
+      />
+    </View>
+  );
+}
+
+// ============================================================================
+// EXAMPLE 4: Loading and Error States
+// ============================================================================
+
+import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { Button, Card, Spacer, InfoBox, LoadingOverlay } from '../src/components';
+import { theme } from '../src/theme';
+
+function LoadingErrorExample() {
+  const [state, setState] = useState<'idle' | 'loading' | 'error' | 'success'>('idle');
+
+  const handleFetch = () => {
+    setState('loading');
+    setTimeout(() => {
+      // Simulate 50% error rate
+      setState(Math.random() > 0.5 ? 'success' : 'error');
+    }, 2000);
+  };
+
+  const reset = () => setState('idle');
+
+  return (
+    <View style={styles.container}>
+      {/* Success State */}
+      {state === 'success' && (
+        <>
+          <Card elevated style={styles.successCard}>
+            <View style={styles.successContent}>
+              <Text style={styles.checkmark}>✓</Text>
+              <Spacer size={theme.spacing.md} />
+              <Text style={styles.successTitle}>Upload Successful!</Text>
+              <Spacer size={theme.spacing.sm} />
+              <Text style={styles.successDesc}>
+                Your file has been processed and is ready to view
+              </Text>
+            </View>
+          </Card>
+          <Spacer size={theme.spacing.lg} />
+          <Button title="Continue" onPress={reset} size="large" fullWidth />
+        </>
+      )}
+
+      {/* Error State */}
+      {state === 'error' && (
+        <>
+          <InfoBox
+            message="Something went wrong. Please check your connection and try again."
+            type="error"
+          />
+          <Spacer size={theme.spacing.lg} />
+          <Button title="Retry" onPress={handleFetch} size="large" fullWidth />
+          <Spacer size={theme.spacing.md} />
+          <Button
+            title="Cancel"
+            onPress={reset}
+            variant="outline"
+            size="large"
+            fullWidth
+          />
+        </>
+      )}
+
+      {/* Idle State */}
+      {state === 'idle' && (
+        <Button title="Start Upload" onPress={handleFetch} size="large" fullWidth />
+      )}
+
+      {/* Loading Overlay */}
+      <LoadingOverlay visible={state === 'loading'} message="Processing your file..." />
+    </View>
+  );
+}
+
+// ============================================================================
+// EXAMPLE 5: Detailed Card Layout
+// ============================================================================
+
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { Card, Spacer } from '../src/components';
+import { Ionicons } from '@expo/vector-icons';
+import { theme } from '../src/theme';
+
+function DetailedCardExample() {
+  return (
+    <Card elevated>
+      {/* Header with Icon */}
+      <View style={styles.cardHeader}>
+        <View style={styles.headerIcon}>
+          <Ionicons name="pulse-outline" size={24} color={theme.colors.primary} />
+        </View>
+        <Text style={styles.headerTitle}>Blood Pressure</Text>
+      </View>
+
+      <Spacer size={theme.spacing.md} />
+
+      {/* Content Rows */}
+      <View style={styles.contentRow}>
+        <Text style={styles.label}>Systolic</Text>
+        <Text style={styles.value}>120 mmHg</Text>
+      </View>
+
+      <View style={styles.divider} />
+
+      <View style={styles.contentRow}>
+        <Text style={styles.label}>Diastolic</Text>
+        <Text style={styles.value}>80 mmHg</Text>
+      </View>
+
+      <View style={styles.divider} />
+
+      <View style={styles.contentRow}>
+        <Text style={styles.label}>Status</Text>
+        <View style={styles.statusBadge}>
+          <Text style={styles.statusText}>Normal</Text>
+        </View>
+      </View>
+
+      <Spacer size={theme.spacing.md} />
+
+      {/* Footer Info */}
+      <Text style={styles.timestamp}>Recorded today at 9:30 AM</Text>
+    </Card>
+  );
+}
+
+// Styles for Examples
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background.primary,
+  },
+  content: {
+    paddingHorizontal: theme.layout.screenPadding,
+    paddingBottom: theme.spacing['3xl'],
+  },
+  hero: {
+    alignItems: 'center',
+    paddingTop: theme.spacing['3xl'],
+    paddingBottom: theme.spacing.xl,
+  },
+  title: {
+    fontSize: theme.typography.fontSize['2xl'],
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+  },
+  iconBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: theme.borderRadius.xl,
+    backgroundColor: theme.colors.iconBackground.blue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  smallBadge: {
+    width: 48,
+    height: 48,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.background.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: theme.spacing.md,
+  },
+  featureText: {
+    flex: 1,
+  },
+  featureTitle: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+  },
+  featureDesc: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    marginTop: 2,
+  },
+  // List styles
+  header: {
+    paddingHorizontal: theme.layout.screenPadding,
+    paddingTop: theme.spacing.lg,
+    paddingBottom: theme.spacing.md,
+  },
+  listContent: {
+    paddingHorizontal: theme.layout.screenPadding,
+    paddingBottom: theme.spacing['3xl'],
+  },
+  emptyContainer: {
+    paddingVertical: theme.spacing['4xl'],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: theme.borderRadius.xl,
+    backgroundColor: theme.colors.background.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyTitle: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+  },
+  emptyDesc: {
+    fontSize: theme.typography.fontSize.base,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+  },
+  recordCard: {
+    marginBottom: theme.spacing.md,
+  },
+  recordHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  recordIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.borderRadius.sm,
+    backgroundColor: theme.colors.background.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: theme.spacing.md,
+  },
+  recordInfo: {
+    flex: 1,
+  },
+  recordTitle: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+  },
+  recordDate: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
+    marginTop: 2,
+  },
+  // Success/Error styles
+  successCard: {
+    backgroundColor: theme.colors.iconBackground.blue,
+  },
+  successContent: {
+    alignItems: 'center',
+    paddingVertical: theme.spacing.lg,
+  },
+  checkmark: {
+    fontSize: 48,
+    color: theme.colors.success,
+  },
+  successTitle: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+  },
+  successDesc: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+  },
+  // Detailed card styles
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.borderRadius.sm,
+    backgroundColor: theme.colors.background.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: theme.spacing.md,
+  },
+  headerTitle: {
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+  },
+  contentRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  label: {
+    fontSize: theme.typography.fontSize.sm,
+    color: theme.colors.text.secondary,
+  },
+  value: {
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.text.primary,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: theme.colors.border.light,
+    marginVertical: theme.spacing.md,
+  },
+  statusBadge: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.full,
+    backgroundColor: theme.colors.iconBackground.teal,
+  },
+  statusText: {
+    fontSize: theme.typography.fontSize.xs,
+    fontWeight: theme.typography.fontWeight.semibold,
+    color: theme.colors.success,
+  },
+  timestamp: {
+    fontSize: theme.typography.fontSize.xs,
+    color: theme.colors.text.tertiary,
+    textAlign: 'center',
+  },
+});
+
+export {
+  WelcomeScreenExample,
+  FormScreenExample,
+  ListScreenExample,
+  LoadingErrorExample,
+  DetailedCardExample,
+};
